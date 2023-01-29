@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "demo NFT project for using the Diamond Randomness System of the Diamond Blockchain (v4)",
   "main": "index.js",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "compile": "npx hardhat compile",
     "deploy-on-alpha": "npx ts-node scripts/deploy.ts --network alpha",

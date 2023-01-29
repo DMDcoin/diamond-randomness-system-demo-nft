@@ -25,13 +25,12 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const getMnemonic = () => {
   try {
-    return fs.readFileSync(".mnemonic").toString().trim()
+    return fs.readFileSync(".mnemonic").toString().trim();
   } catch {
     // this is a dummy mnemonic
     return "rival month fortune";
   }
-}
-
+};
 
 const config: HardhatUserConfig = {
   solidity: "0.8.17",
@@ -44,13 +43,13 @@ const config: HardhatUserConfig = {
     alpha: {
       url: "http://38.242.206.145:8540",
       accounts: {
-        mnemonic:  getMnemonic(),
+        mnemonic: getMnemonic(),
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 20,
         passphrase: "",
       },
-    }
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -65,10 +64,10 @@ const config: HardhatUserConfig = {
         chainId: 777012,
         urls: {
           apiURL: "http://explorer.uniq.diamonds/api",
-          browserURL: "http://explorer.uniq.diamonds"
-        }
-      }
-    ]
+          browserURL: "http://explorer.uniq.diamonds",
+        },
+      },
+    ],
   },
 };
 
