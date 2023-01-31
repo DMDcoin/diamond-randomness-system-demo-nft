@@ -6,9 +6,7 @@ import {
   DemoNFT,
   DemoNFT__factory,
   IRandomHbbft,
-  IRandomHbbft__factory,
   INetworkHealthHbbft,
-  INetworkHealthHbbft__factory,
   /* eslint-disable-next-line */
 } from "../typechain";
 
@@ -37,25 +35,27 @@ describe("NFT", function () {
   let nft: DemoNFT | undefined;
   let health: INetworkHealthHbbft | undefined;
 
-  let network_currently_healthy: boolean = false;
+  let networkCurrentlyHealthy: boolean = false;
 
   it("deploy contract", async function () {
-
     const rngContractAddress = "0x7000000000000000000000000000000000000001";
     const healthContractAddress = "0x1000000000000000000000000000000000000001";
 
     rng = await ethers.getContractAt("IRandomHbbft", rngContractAddress);
-    health = await ethers.getContractAt("INetworkHealthHbbft", healthContractAddress);
-    nft = await NFT?.deploy(rng?.address!, health?.address!);
-    await nft?.deployed();
+    health = await ethers.getContractAt(
+      "INetworkHealthHbbft",
+      healthContractAddress
+    );
+
     // we assume that this status stays the same for the duration of the test
-    network_currently_healthy = await health.isFullHealth();
+    networkCurrentlyHealthy = await health.isFullHealth();
 
-    console.log(`Network is healthy: ${network_currently_healthy}`, );
+    console.log(`Network is healthy: ${networkCurrentlyHealthy}`);
+    console.log(`deploying contracts...`);
+    nft = await NFT?.deploy(rng?.address!, health?.address!);
+    console.log(`awaiting deployment...`);
+    await nft?.deployed();
   });
-
-
-  
 
   // it("minting should fail if not registered", async () => {
   //   if (nft) {
