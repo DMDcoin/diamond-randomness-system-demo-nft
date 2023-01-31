@@ -10,7 +10,8 @@
     "compile": "npx hardhat compile",
     "deploy-on-alpha": "npx ts-node scripts/deploy.ts --network alpha",
     "test": "npx hardhat test",
-    "test-on-alpha": "npx hardhat test --network alpha test-dmd/index.ts"
+    "test-on-alpha": "npx hardhat test --network alpha test-dmd/index.ts",
+    "test-on-local": "npx hardhat test --network local test-dmd/index.ts"
   },
   "author": "thomashaller@gmx.at",
   "license": "MIT",
