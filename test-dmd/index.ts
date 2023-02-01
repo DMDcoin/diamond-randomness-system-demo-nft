@@ -69,9 +69,10 @@ describe("NFT", function () {
   //   }
   // });
 
-  it("registering minting should succeed if  enough minting fee is provided.", async () => {
+  it("registering minting should succeed if enough minting fee is provided.", async () => {
     if (nft) {
-      await nft.registerMinting(main, registrationFee);
+      const mintRegistration = await nft.registerMinting(main, registrationFee);
+      mintRegistration.wait();
     }
     // console.log("mintTX:", mintTX?.hash);
   });
@@ -85,7 +86,7 @@ describe("NFT", function () {
 
   it("minting should succeed if registered.", async () => {
     if (nft) {
-      await nft.mintTo(main);
+      await nft.mintTo(main, { gasLimit: 1000000 });
       const tokenID = 1;
       const owner = await nft.ownerOf(tokenID);
       expect(owner).to.equal(main);
