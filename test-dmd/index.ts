@@ -6,7 +6,6 @@ import {
   DemoNFT,
   DemoNFT__factory,
   IRandomHbbft,
-  INetworkHealthHbbft,
   /* eslint-disable-next-line */
 } from "../typechain";
 
@@ -33,26 +32,20 @@ describe("NFT", function () {
 
   let rng: IRandomHbbft | undefined;
   let nft: DemoNFT | undefined;
-  let health: INetworkHealthHbbft | undefined;
 
   let networkCurrentlyHealthy: boolean = false;
 
   it("deploy contract", async function () {
     const rngContractAddress = "0x7000000000000000000000000000000000000001";
-    const healthContractAddress = "0x1000000000000000000000000000000000000001";
 
     rng = await ethers.getContractAt("IRandomHbbft", rngContractAddress);
-    health = await ethers.getContractAt(
-      "INetworkHealthHbbft",
-      healthContractAddress
-    );
 
     // we assume that this status stays the same for the duration of the test
-    networkCurrentlyHealthy = await health.isFullHealth();
+    networkCurrentlyHealthy = await rng.isFullHealth();
 
     console.log(`Network is healthy: ${networkCurrentlyHealthy}`);
     console.log(`deploying contracts...`);
-    nft = await NFT?.deploy(rng?.address!, health?.address!);
+    nft = await NFT?.deploy(rng?.address!);
     console.log(`awaiting deployment...`);
     await nft?.deployed();
   });
@@ -73,6 +66,12 @@ describe("NFT", function () {
     if (nft) {
       const mintRegistration = await nft.registerMinting(main, registrationFee);
       mintRegistration.wait();
+
+      function sleep(milliseconds: number) {
+        return new Promise((resolve) => setTimeout(resolve, milliseconds));
+      }
+
+      await sleep(5000);
     }
     // console.log("mintTX:", mintTX?.hash);
   });
@@ -86,7 +85,8 @@ describe("NFT", function () {
 
   it("minting should succeed if registered.", async () => {
     if (nft) {
-      await nft.mintTo(main, { gasLimit: 1000000 });
+      const mintToTx = await nft.mintTo(main, { gasLimit: 1000000 });
+      mintToTx.wait();
       const tokenID = 1;
       const owner = await nft.ownerOf(tokenID);
       expect(owner).to.equal(main);
