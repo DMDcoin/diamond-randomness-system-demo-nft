@@ -7,8 +7,6 @@ import {
   DemoNFT__factory,
   MockRandomHbbft,
   MockRandomHbbft__factory,
-  MockNetworkHealthHbbft,
-  MockNetworkHealthHbbft__factory,
   /* eslint-disable-next-line */
 } from "../typechain";
 
@@ -20,7 +18,6 @@ describe("NFT", function () {
   let nftServiceAccount: SignerWithAddress | undefined;
   let NFT: DemoNFT__factory | undefined;
   let RNG: MockRandomHbbft__factory | undefined;
-  let HEALTH: MockNetworkHealthHbbft__factory | undefined;
 
   const registrationFee: { value: string } = { value: "1000000000000000000" };
 
@@ -32,19 +29,15 @@ describe("NFT", function () {
     nftServiceAccount = signers[3];
     NFT = await ethers.getContractFactory("DemoNFT");
     RNG = await ethers.getContractFactory("MockRandomHbbft");
-    HEALTH = await ethers.getContractFactory("MockNetworkHealthHbbft");
   });
 
   let rng: MockRandomHbbft | undefined;
   let nft: DemoNFT | undefined;
-  let health: MockNetworkHealthHbbft | undefined;
 
   it("deploy contract", async function () {
     rng = await RNG?.deploy();
     await rng?.deployed();
-    health = await HEALTH?.deploy();
-    await health?.deployed();
-    nft = await NFT?.deploy(rng?.address!, health?.address!);
+    nft = await NFT?.deploy(rng?.address!);
     await nft?.deployed();
   });
 
@@ -114,7 +107,7 @@ describe("NFT", function () {
 
   it("minting registration not possible during unhealthy network state", async () => {
     if (nft && nftPayerAccount && nftServiceAccount) {
-      await health?.setHealth(false);
+      await rng?.setHealth(false);
 
       await expect(
         nft.registerMinting(nftReveiverAccount?.address!, registrationFee)
@@ -124,9 +117,9 @@ describe("NFT", function () {
 
   it("minting not possible during unhealthy network state", async () => {
     if (nft && nftPayerAccount && nftServiceAccount) {
-      await health?.setHealth(true);
+      await rng?.setHealth(true);
       await nft.registerMinting(nftReveiverAccount?.address!, registrationFee);
-      await health?.setHealth(false);
+      await rng?.setHealth(false);
       await expect(nft.mintTo(nftReveiverAccount?.address!)).revertedWith(
         "No Healthy RNG on this Block"
       );
@@ -143,7 +136,7 @@ describe("NFT", function () {
 
   it("rescheduling minting possible if network becomes healthy", async () => {
     if (nft) {
-      await health?.setHealth(true);
+      await rng?.setHealth(true);
       await nft.rescheduleUnhealthyMintRegistration(
         nftReveiverAccount?.address!
       );
