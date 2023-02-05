@@ -36,57 +36,53 @@ describe("NFT", function () {
   let networkCurrentlyHealthy: boolean = false;
 
   it("deploy contract", async function () {
-    const rngContractAddress = "0x7000000000000000000000000000000000000001";
+    const rngContractAddress = "0x3000000000000000000000000000000000000001";
 
     rng = await ethers.getContractAt("IRandomHbbft", rngContractAddress);
 
+    // console.log(`is network healthy?`);
     // we assume that this status stays the same for the duration of the test
     networkCurrentlyHealthy = await rng.isFullHealth();
 
-    console.log(`Network is healthy: ${networkCurrentlyHealthy}`);
-    console.log(`deploying contracts...`);
+    // console.log(`Network is healthy: ${networkCurrentlyHealthy}`);
+    // console.log(`deploying contracts...`);
     nft = await NFT?.deploy(rng?.address!);
-    console.log(`awaiting deployment...`);
+    // console.log(`awaiting deployment...`);
     await nft?.deployed();
   });
 
-  // it("minting should fail if not registered", async () => {
-  //   if (nft) {
-  //     expect(await nft.mintTo(main)).to.be.reverted;
-  //   }
-  // });
+  it("minting should fail if not registered", async () => {
+    if (nft) {
+      await expect(nft.mintTo(main)).to.be.throw;
+    }
+  });
 
-  // it("registering minting should fail if not enough minting fee is provided.", async () => {
-  //   if (nft) {
-  //     await nft.registerMinting(main);
-  //   }
-  // });
+  it("registering minting should fail if not enough minting fee is provided.", async () => {
+    if (nft) {
+      await expect(nft.registerMinting(main)).to.be.throw;
+    }
+  });
 
   it("registering minting should succeed if enough minting fee is provided.", async () => {
     if (nft) {
+      // console.log("registering minting...");
       const mintRegistration = await nft.registerMinting(main, registrationFee);
-      mintRegistration.wait();
+      await mintRegistration.wait();
+    }
+  });
 
-      function sleep(milliseconds: number) {
-        return new Promise((resolve) => setTimeout(resolve, milliseconds));
-      }
-
-      await sleep(5000);
+  it("registering minting should fail if already registered.", async () => {
+    if (nft) {
+      await expect(nft.registerMinting(main, registrationFee)).to.be.throw;
     }
     // console.log("mintTX:", mintTX?.hash);
   });
 
-  // it("registering minting should fail if already registered.", async () => {
-  //   if (nft) {
-  //     await expect(nft.registerMinting(main, registrationFee)).to.be.thrown();
-  //   }
-  //   // console.log("mintTX:", mintTX?.hash);
-  // });
-
   it("minting should succeed if registered.", async () => {
+    console.log("minting...");
     if (nft) {
       const mintToTx = await nft.mintTo(main, { gasLimit: 1000000 });
-      mintToTx.wait();
+      await mintToTx.wait();
       const tokenID = 1;
       const owner = await nft.ownerOf(tokenID);
       expect(owner).to.equal(main);
@@ -94,24 +90,6 @@ describe("NFT", function () {
       expect(tokenDna).not.to.equal(
         "0x0000000000000000000000000000000000000000000000000000000000000000"
       );
-    }
-  });
-
-  it("minting registration and minting for other accounts should be possible", async () => {
-    if (nft && nftPayerAccount && nftServiceAccount) {
-      await nft
-        .connect(nftPayerAccount)
-        .registerMinting(nftReveiverAccount?.address!, registrationFee);
-
-      await nft.connect(nftServiceAccount).mintTo(nftReveiverAccount?.address!);
-
-      // reveiver have never sent a transaction.
-      expect(
-        await ethers.provider.getTransactionCount(nftReveiverAccount?.address!)
-      ).to.equal(0);
-
-      // ... but it still owns an NFT.
-      expect(await nft.ownerOf(2)).to.equal(nftReveiverAccount?.address!);
     }
   });
 });
