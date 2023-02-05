@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     alpha: {
-      url: "http://38.242.206.145:8540",
+      url: "http://rpc.uniq.diamonds:8540",
       accounts: {
         mnemonic: getMnemonic(),
         path: "m/44'/60'/0'/0",
