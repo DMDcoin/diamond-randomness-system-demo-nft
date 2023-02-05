@@ -7,15 +7,12 @@ import {
   DemoNFT__factory,
   IRandomHbbft,
   /* eslint-disable-next-line */
-} from "../typechain";
+} from "../typechain-types";
 
 describe("NFT", function () {
   let signers: SignerWithAddress[] | undefined;
   let main: string = "";
   let mainSigner: SignerWithAddress | undefined;
-  let nftPayerAccount: SignerWithAddress | undefined;
-  let nftReveiverAccount: SignerWithAddress | undefined;
-  let nftServiceAccount: SignerWithAddress | undefined;
   let NFT: DemoNFT__factory | undefined;
 
   const registrationFee: { value: string } = { value: "1000000000000000000" };
@@ -24,10 +21,7 @@ describe("NFT", function () {
     signers = await ethers.getSigners();
     mainSigner = signers[0];
     main = mainSigner.address;
-    nftPayerAccount = signers[1];
-    nftReveiverAccount = signers[2];
-    nftServiceAccount = signers[3];
-    NFT = await ethers.getContractFactory("DemoNFT");
+    NFT = (await ethers.getContractFactory("DemoNFT")) as DemoNFT__factory;
   });
 
   let rng: IRandomHbbft | undefined;
@@ -43,6 +37,10 @@ describe("NFT", function () {
     // console.log(`is network healthy?`);
     // we assume that this status stays the same for the duration of the test
     networkCurrentlyHealthy = await rng.isFullHealth();
+
+    if (!networkCurrentlyHealthy) {
+      throw Error("Tests can only be executed on healthy networks.");
+    }
 
     // console.log(`Network is healthy: ${networkCurrentlyHealthy}`);
     // console.log(`deploying contracts...`);
