@@ -3,7 +3,6 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./interfaces/IRandomHbbft.sol";
-import "./interfaces/INetworkHealthHbbft.sol";
 
 /** @dev demonstrates an NFT using the Diamond Randomness System as an example.
  */
@@ -31,9 +30,6 @@ contract DemoNFT is ERC721 {
     // Mock Implementation for tests, Diamond Contracts for diamond-node networks.
     IRandomHbbft public randomHbbft;
 
-    // Mock Implementation for tests, Diamond Contracts for diamond-node networks.
-    INetworkHealthHbbft public networkHealthHbbft;
-
     /** @dev mint registered event,
      * emitted when a minting is registered
      * block_number is the block number of the block where minting becomes possible.
@@ -44,13 +40,11 @@ contract DemoNFT is ERC721 {
 
     /** @dev constructor for the DemoNFT contract
      * @param randomHbbftAddress IRandomHbbft address. Mock Implementation for tests, Diamond Contracts for diamond-node networks.
-     * @param networkHealthHbbftAddress INetworkHealthHbbft address. Mock Implementation for tests, Diamond Contracts for diamond-node networks.
      */
-    constructor(address randomHbbftAddress, address networkHealthHbbftAddress)
+    constructor(address randomHbbftAddress)
         ERC721("DemoNFT", "DEMO")
     {
         randomHbbft = IRandomHbbft(randomHbbftAddress);
-        networkHealthHbbft = INetworkHealthHbbft(networkHealthHbbftAddress);
     }
 
     /** @dev registers a minting of an NFT, paying the minting fee.
@@ -70,7 +64,7 @@ contract DemoNFT is ERC721 {
         // It is highly likely that an unhealthy network is still unhealthy on the next block
         // therefore we do not allow the registrations, since it is also the point in time when the fee is paid.
         require(
-            networkHealthHbbft.isFullHealth(),
+            randomHbbft.isFullHealth(),
             "Service is currently paused"
         );
 
@@ -102,7 +96,7 @@ contract DemoNFT is ERC721 {
         // It is highly likely that an unhealthy network is still unhealthy on the next block
         // therefore we do not allow the registrations, since it is also the point in time when the fee is paid.
         require(
-            networkHealthHbbft.isFullHealthHistoric(blockNumber),
+            randomHbbft.isFullHealthHistoric(blockNumber),
             "No Healthy RNG on this Block"
         );
 
@@ -136,11 +130,11 @@ contract DemoNFT is ERC721 {
         uint256 blockNumber = _mintingRegistryBlocks[_to];
         require(blockNumber != 0, "minting not registered");
         require(
-            !networkHealthHbbft.isFullHealthHistoric(blockNumber),
+            !randomHbbft.isFullHealthHistoric(blockNumber),
             "already healthy registered"
         );
         require(
-            networkHealthHbbft.isFullHealth(),
+            randomHbbft.isFullHealth(),
             "network needs to be healthy"
         );
         // move the registration to the next block - that should be healthy.

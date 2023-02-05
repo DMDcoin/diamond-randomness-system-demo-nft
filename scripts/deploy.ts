@@ -21,10 +21,10 @@ async function main() {
   // todo: get address  from DMD network,
   // or deploy a new random contract.
   const rngContractAddress = "0x7000000000000000000000000000000000000001";
-  const healthContractAddress = "0x1000000000000000000000000000000000000001";
 
-  const nft = await DemoNFT.deploy(rngContractAddress, healthContractAddress);
+  const nft = await DemoNFT.deploy(rngContractAddress);
   await nft.deployed();
+
   console.log("DemoNFT deployed to:", nft.address);
 
   // verify on blockscout.
@@ -37,7 +37,7 @@ async function main() {
   if (listOfSupportedNetworks.includes(network.chainId)) {
     await hre.run("verify:verify", {
       address: nft.address,
-      constructorArguments: [rngContractAddress, healthContractAddress],
+      constructorArguments: [rngContractAddress],
     });
   }
 }
